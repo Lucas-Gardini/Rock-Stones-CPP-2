@@ -14,10 +14,11 @@ public:
 
 	Direcoes direcaoAtual;
 
-	Personagem() {
+	Personagem(int x, int y) {
 		this->texture.loadFromFile(ASSETS_FOLDER + "sprites/personagem/dwarf1.png");
 		this->rectSourceSprite = sf::IntRect(0, 0, SPRITE_WIDTH, SPRITE_HEIGHT);
 		this->sprite = sf::Sprite(this->texture, this->rectSourceSprite);
+		this->sprite.setPosition(static_cast<float>(x), static_cast<float>(y));
 	}
 
 	void animateWalk(Direcoes direcao) {
@@ -71,5 +72,13 @@ public:
 			newPosition.y >= 0 && newPosition.y <= windowSize.y - SPRITE_HEIGHT) {
 			sprite.move(offset);
 		}
+	}
+
+	sf::Vector2f getPosition() const {
+		return sprite.getPosition();
+	}
+
+	void setPosition(const sf::Vector2f& position) {
+		sprite.setPosition(position);
 	}
 };
