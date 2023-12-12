@@ -70,40 +70,12 @@ const int CURA_CAPSULA = 20;
 
 const int DANO_SANGRAMENTO = 2;
 
-const int BATEDOR_VIDA = 60;
-const int BATEDOR_ATAQUE = 20;
-const int BATEDOR_DEFESA = 0;
-const int BATEDOR_ATQ_ESPECIAL = 42;
-const int BATEDOR_CUSTO_ESPECIAL = 110;
-const int BATEDOR_MANA = 200;
-
-const int GUERREIRO_VIDA = 100;
-const int GUERREIRO_ATAQUE = 27;
-const int GUERREIRO_DEFESA = 7;
-const int GUERREIRO_ATQ_ESPECIAL = 35;
-const int GUERREIRO_CUSTO_ESPECIAL = 100;
-const int GUERREIRO_MANA = 200;
-
-const int ENGENHEIRO_VIDA = 70;
-const int ENGENHEIRO_ATAQUE = 25;
-const int ENGENHEIRO_DEFESA = 2;
-const int ENGENHEIRO_ATQ_ESPECIAL = 35;
-const int ENGENHEIRO_CUSTO_ESPECIAL = 80;
-const int ENGENHEIRO_MANA = 200;
-
-const int ESCAVADOR_VIDA = 80;
-const int ESCAVADOR_ATAQUE = 20;
-const int ESCAVADOR_DEFESA = 3;
-const int ESCAVADOR_ATQ_ESPECIAL = 35;
-const int ESCAVADOR_CUSTO_ESPECIAL = 80;
-const int ESCAVADOR_MANA = 200;
-
-const int MEDICO_VIDA = 60;
-const int MEDICO_ATAQUE = 20;
-const int MEDICO_DEFESA = 4;
-const int MEDICO_ATQ_ESPECIAL = 30;
-const int MEDICO_CUSTO_ESPECIAL = 70;
-const int MEDICO_MANA = 200;
+const int PERSONAGEM_VIDA = 100;
+const int PERSONAGEM_ATAQUE = 27;
+const int PERSONAGEM_DEFESA = 7;
+const int PERSONAGEM_ATQ_ESPECIAL = 35;
+const int PERSONAGEM_CUSTO_ESPECIAL = 100;
+const int PERSONAGEM_MANA = 200;
 
 const int ARANHA_VIDA = 20;
 const int ARANHA_ATAQUE = 8;

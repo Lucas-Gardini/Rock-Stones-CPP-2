@@ -60,6 +60,8 @@ public:
 					if (!isWall(nextPosition, mapa)) {
 						player.move(sf::Vector2f(nextPosition.x - player.getPosition().x, nextPosition.y - player.getPosition().y), window.getSize());
 						this->handleDoorCollision(player.getPosition());
+
+            this->handleMonsterCollision(player.getPosition());
 					}
 				}
 			}
@@ -159,6 +161,16 @@ private:
 			MAPAS[currentMap][mapY * LARGURA_MAPA + mapX] == 2);
 	}
 
+  bool isMonster(sf::Vector2f position)
+  {
+    int mapX = static_cast<int>(position.x / 24);
+    int mapY = static_cast<int>(position.y / 24) + 2;
+
+    // Verificar se a posição atual está sobre o chão 3
+    return (mapX >= 0 && mapX < LARGURA_MAPA &&
+      mapY >= 0 && mapY < ALTURA_MAPA &&
+      MAPAS[currentMap][mapY * LARGURA_MAPA + mapX] == 3);
+  }
 
 	const int* getMapa(int index) {
 		if (index >= 0 && index < NUMERO_TOTAL_MAPAS) {
@@ -190,6 +202,15 @@ private:
 			}
 		}
 	}
+
+  void handleMonsterCollision(sf::Vector2f playerPosition)
+  {
+    if (isMonster(playerPosition)) {
+      std::cout << "Area de Monstro!" << std::endl;
+
+      // Iniciar uma batalha aqui e se for trabalhar com chances de começar uma luta ja fazer aqui
+    }
+  }
 };
 
 int main()

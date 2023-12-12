@@ -7,6 +7,19 @@
 #define SPRITE_HEIGHT 64
 
 class Personagem {
+private:
+  int _HP, _ATQ, _DEF, _ESP, _CUSTO_MANA;
+  int vidaAtual = 0;
+  int manaAtual = 0;
+  int grauFerimento = 0;
+
+  int minerios[4][2] = {
+    {OURO, 0},
+    {MORKITA, 0},
+    {DYSTRUM, 0},
+    {NITRA, 0}
+  };
+
 public:
 	sf::Texture texture;
 	sf::IntRect rectSourceSprite;
