@@ -37,8 +37,8 @@ public:
 		else if (i == ENGENHEIRO) {
 			this->texture.loadFromFile(ASSETS_FOLDER + "sprites/personagem/engenheiro.png");
 		}
-		else if (i == GUERREIRO) {
-			this->texture.loadFromFile(ASSETS_FOLDER + "sprites/personagem/guerreiro.png");
+		else if (i == ESCAVADOR) {
+			this->texture.loadFromFile(ASSETS_FOLDER + "sprites/personagem/escavador.png");
 		}
 		else if (i == MEDICO) {
 			this->texture.loadFromFile(ASSETS_FOLDER + "sprites/personagem/medico.png");

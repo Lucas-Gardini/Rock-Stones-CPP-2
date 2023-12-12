@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="modules\Item.cpp" />
     <ClCompile Include="modules\Personagem.cpp" />
     <ClCompile Include="modules\Monstro.cpp" />
   </ItemGroup>
@@ -148,13 +149,33 @@
     <ClInclude Include="modules\utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="assets\screens\embatalha.png" />
+    <Image Include="assets\screens\personagens1.png" />
+    <Image Include="assets\screens\personagens2.png" />
+    <Image Include="assets\screens\personagens3.png" />
+    <Image Include="assets\screens\personagens4.png" />
+    <Image Include="assets\screens\personagens5.png" />
+    <Image Include="assets\sprites\armas\armas.png" />
+    <Image Include="assets\sprites\personagem\batedor.png" />
     <Image Include="assets\sprites\personagem\dwarf1.png" />
     <Image Include="assets\sprites\personagem\dwarf2.png" />
     <Image Include="assets\sprites\personagem\dwarf3.png" />
     <Image Include="assets\sprites\personagem\dwarf4.png" />
     <Image Include="assets\sprites\personagem\dwarf5.png" />
     <Image Include="assets\sprites\personagem\dwarf6.png" />
+    <Image Include="assets\sprites\personagem\engenheiro.png" />
+    <Image Include="assets\sprites\personagem\escavador.png" />
+    <Image Include="assets\sprites\personagem\guerreiro.png" />
+    <Image Include="assets\sprites\personagem\medico.png" />
+    <Image Include="assets\sprites\texturas\ground.jpg" />
+    <Image Include="assets\sprites\texturas\wall.png" />
     <Image Include="assets\title.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".gitignore" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="assets\click.wav" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
