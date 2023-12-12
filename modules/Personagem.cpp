@@ -7,28 +7,45 @@
 #define SPRITE_HEIGHT 64
 
 class Personagem {
-private:
-  int _HP, _ATQ, _DEF, _ESP, _CUSTO_MANA;
-  int vidaAtual = 0;
-  int manaAtual = 0;
-  int grauFerimento = 0;
 
-  int minerios[4][2] = {
-    {OURO, 0},
-    {MORKITA, 0},
-    {DYSTRUM, 0},
-    {NITRA, 0}
-  };
+private:
+	int _HP, _ATQ, _DEF, _ESP, _CUSTO_MANA;
+	int vidaAtual = 0;
+	int manaAtual = 0;
+	int grauFerimento = 0;
+
+	int minerios[4][2] = {
+	  {OURO, 0},
+	  {MORKITA, 0},
+	  {DYSTRUM, 0},
+	  {NITRA, 0}
+	};
 
 public:
 	sf::Texture texture;
 	sf::IntRect rectSourceSprite;
 	sf::Sprite sprite;
-
 	Direcoes direcaoAtual;
 
-	Personagem(int x, int y) {
-		this->texture.loadFromFile(ASSETS_FOLDER + "sprites/personagem/dwarf1.png");
+	Personagem(int x, int y, int i) {
+		if (i == BATEDOR) {
+			this->texture.loadFromFile(ASSETS_FOLDER + "sprites/personagem/batedor.png");
+		}
+		else if (i == GUERREIRO) {
+			this->texture.loadFromFile(ASSETS_FOLDER + "sprites/personagem/guerreiro.png");
+		}
+		else if (i == ENGENHEIRO) {
+			this->texture.loadFromFile(ASSETS_FOLDER + "sprites/personagem/engenheiro.png");
+		}
+		else if (i == GUERREIRO) {
+			this->texture.loadFromFile(ASSETS_FOLDER + "sprites/personagem/guerreiro.png");
+		}
+		else if (i == MEDICO) {
+			this->texture.loadFromFile(ASSETS_FOLDER + "sprites/personagem/medico.png");
+		}
+		else {
+			return;
+		}
 		this->rectSourceSprite = sf::IntRect(0, 0, SPRITE_WIDTH, SPRITE_HEIGHT);
 		this->sprite = sf::Sprite(this->texture, this->rectSourceSprite);
 		this->sprite.setPosition(static_cast<float>(x), static_cast<float>(y));
@@ -79,7 +96,7 @@ public:
 
 	void move(const sf::Vector2f& offset, const sf::Vector2u& windowSize) {
 
-		// Verifique se o novo local não ultrapassa os limites da janela
+		// Verifique se o novo local nao ultrapassa os limites da janela
 		sf::Vector2f newPosition = sprite.getPosition() + offset;
 		if (newPosition.x >= 0 && newPosition.x <= windowSize.x - SPRITE_WIDTH &&
 			newPosition.y >= 0 && newPosition.y <= windowSize.y - SPRITE_HEIGHT) {
