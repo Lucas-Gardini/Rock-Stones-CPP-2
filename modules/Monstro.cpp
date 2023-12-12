@@ -52,9 +52,8 @@ public:
       estatisticas[0] = this->vidaAtual;
     else
       estatisticas[0] = this->_HP;
-
-    estatisticas[1] = this->_DEF;
-    estatisticas[2] = this->_ATQ;
+      estatisticas[1] = this->_DEF;
+      estatisticas[2] = this->_ATQ;
 
     return estatisticas;
   }

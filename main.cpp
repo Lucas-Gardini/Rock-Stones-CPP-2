@@ -5,6 +5,7 @@
 #include "modules/.env.h"
 #include "modules/utils.h"
 #include "modules/Personagem.cpp"
+#include "modules/Monstro.cpp"
 
 const int* MAPAS[NUMERO_TOTAL_MAPAS] = { &MAPA_INICIAL[0][0], &MAPA_2[0][0], &MAPA_3[0][0]};
 
@@ -211,6 +212,26 @@ private:
 
       if (gerarNumeroAleatorio(1, 5) == 3) {
         std::cout << "Começar uma batalha!" << std::endl;
+
+        int IndiceMonstro = gerarNumeroAleatorio(0, 2);
+
+        Monstro *novoMonstro = nullptr;
+
+        switch (IndiceMonstro) {
+        case ARANHA:
+          novoMonstro = new Aranha();
+          break;
+        case ARANHA_GRANDE:
+          novoMonstro = new AranhaGrande();
+          break;
+        case ESCORPIAO:
+          novoMonstro = new Escorpiao();
+          break;
+        }
+
+         cout << novoMonstro->getNomeMonstro();
+
+         delete novoMonstro;
       }
     }
   }
