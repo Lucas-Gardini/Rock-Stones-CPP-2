@@ -141,9 +141,11 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="modules\Personagem.cpp" />
+    <ClCompile Include="modules\Monstro.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="modules\.env.h" />
+    <ClInclude Include="modules\utils.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\sprites\personagem\dwarf1.png" />

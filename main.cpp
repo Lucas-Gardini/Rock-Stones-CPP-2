@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <ctime>
 #include "modules/.env.h"
+#include "modules/utils.h"
 #include "modules/Personagem.cpp"
 
 const int* MAPAS[NUMERO_TOTAL_MAPAS] = { &MAPA_INICIAL[0][0], &MAPA_2[0][0], &MAPA_3[0][0]};
@@ -208,7 +209,9 @@ private:
     if (isMonster(playerPosition)) {
       std::cout << "Area de Monstro!" << std::endl;
 
-      // Iniciar uma batalha aqui e se for trabalhar com chances de começar uma luta ja fazer aqui
+      if (gerarNumeroAleatorio(1, 5) == 3) {
+        std::cout << "Começar uma batalha!" << std::endl;
+      }
     }
   }
 };
