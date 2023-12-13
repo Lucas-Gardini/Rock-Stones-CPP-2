@@ -15,6 +15,7 @@ class Window {
 public:
 	sf::Texture textureWall;
 	sf::Texture textureGround;
+	sf::Texture textureGrass;
 	vector<sf::Texture*> personagensSelecoes;
 	sf::Texture emBatalha;
 	Item item;
@@ -32,6 +33,7 @@ public:
 	Window() {
 		this->textureWall.loadFromFile(ASSETS_FOLDER + "sprites/texturas/wall.png");
 		this->textureGround.loadFromFile(ASSETS_FOLDER + "sprites/texturas/ground.jpg");
+		this->textureGrass.loadFromFile(ASSETS_FOLDER + "sprites/texturas/grass.png");
 		this->transitionAlpha = 255; // Comeca completamente opaco (sem efeito)
 
 		this->menuSound.loadFromFile(ASSETS_FOLDER + "click.wav");
@@ -102,7 +104,7 @@ public:
 					// Limpe a janela
 					window.clear();
 
-					// Desenhar a tela de seleção na janela
+					// Desenhar a tela de seleo na janela
 					window.draw(telaSelecaoSprite);
 
 					// Atualize a janela
@@ -121,7 +123,7 @@ public:
 					// Limpe a janela
 					window.clear();
 
-					// Desenhar a tela de seleção na janela
+					// Desenhar a tela de seleo na janela
 					window.draw(telaEmBatalha);
 
 					// Atualize a janela
@@ -152,7 +154,7 @@ public:
 								// Reproduza o som
 								sound.play();
 
-								// Aguarde até que o som termine de ser reproduzido (opcional)
+								// Aguarde at que o som termine de ser reproduzido (opcional)
 								while (sound.getStatus() == sf::Sound::Playing) {
 									// Aguarde
 								}
@@ -178,7 +180,7 @@ public:
 								// Reproduza o som
 								sound.play();
 
-								// Aguarde até que o som termine de ser reproduzido (opcional)
+								// Aguarde at que o som termine de ser reproduzido (opcional)
 								while (sound.getStatus() == sf::Sound::Playing) {
 									// Aguarde
 								}
@@ -201,7 +203,22 @@ public:
 							if (!selectedPersonagem) {
 								selectedPersonagem = true;
 
-								this->player = new Personagem(50, 50, this->telaAtualPersonagem);
+								if (this->telaAtualPersonagem == BATEDOR) {
+									this->player = new Batedor(BATEDOR);
+								}
+								else if (this->telaAtualPersonagem == MEDICO) {
+									this->player = new Medico(MEDICO);
+								}
+								else if (this->telaAtualPersonagem == ESCAVADOR) {
+									this->player = new Escavador(ESCAVADOR);
+								}
+								else if (this->telaAtualPersonagem == GUERREIRO) {
+									this->player = new Guerreiro(GUERREIRO);
+								}
+								else if (this->telaAtualPersonagem == ENGENHEIRO) {
+									this->player = new Engenheiro(ENGENHEIRO);
+								}
+
 								continue;
 							}
 							break;
@@ -237,7 +254,7 @@ public:
 					}
 					else {
 						if (SHOW_MONSTERS && mapa[i * LARGURA_MAPA + j] == 3)
-							tile.setFillColor(sf::Color(255, 0, 0)); // Cinza
+							tile.setTexture(&this->textureGrass);
 						else
 							tile.setTexture(&this->textureGround);
 					}
@@ -253,17 +270,19 @@ public:
 			window.draw(transitionRect);
 
 			window.draw(player->getCurrentSprite());
-			if (currentMap == 1) {
+			if (currentMap == 1 && player->getUltArm() != METRALHADORA) {
 				window.draw(item.getCurrentSprite(currentMap, 50, 510));
 				handleGunCollision(item.getCurrentSprite(currentMap, 50, 510));
 			}
-			else if (currentMap == 2) {
+			else if (currentMap == 2 && player->getUltArm() != SHOOTGUN) {
 				window.draw(item.getCurrentSprite(currentMap, 20, 510));
 				handleGunCollision(item.getCurrentSprite(currentMap, 20, 510));
 			}
 			else {
-				window.draw(item.getCurrentSprite(currentMap, 350, 540));
-				handleGunCollision(item.getCurrentSprite(currentMap, 350, 540));
+				if (player->getUltArm() != UZI && currentMap < 1) {
+					window.draw(item.getCurrentSprite(currentMap, 350, 540));
+					handleGunCollision(item.getCurrentSprite(currentMap, 350, 540));
+				}
 			}
 
 			// Gradualmente diminua a intensidade do efeito
@@ -323,8 +342,8 @@ private:
 	}
 
 	void handleGunCollision(sf::Sprite itemSprite) {
-		if (isColliding(player->getCurrentSprite(), itemSprite)) {
-			std::cout << "Personagem colidiu com o item!" << std::endl;
+		if (isColliding(player->getCurrentSprite(), itemSprite) && currentMap != player->getUltArm()) {
+			player->addItem(currentMap);
 			return;
 		}
 		return;
@@ -346,65 +365,66 @@ private:
 			if (gerarNumeroAleatorio(1, 4) == 2) {
 				std::cout << "Comecar uma batalha!" << std::endl;
 
-				int IndiceMonstro = gerarNumeroAleatorio(0, 2);
+					int IndiceMonstro = gerarNumeroAleatorio(0, 2);
 
-				Monstro* novoMonstro = nullptr;
+					Monstro* novoMonstro = nullptr;
 
-				switch (IndiceMonstro) {
-				case ARANHA:
-					novoMonstro = new Aranha();
-					break;
-				case ARANHA_GRANDE:
-					novoMonstro = new AranhaGrande();
-					break;
-				case ESCORPIAO:
-					novoMonstro = new Escorpiao();
-					break;
-				}
-
-				cout << novoMonstro->getNomeMonstro();
-
-				this->batalhando = true;
-
-				// BATALHAR AQUI
-
-				this->window.clear();
-
-				// DESENHAR TODOS OS FRAMES DO DADO AQUI
-				int i = 1;
-				while (i <= 30) {
-					sf::Texture textura;
-					textura.loadFromFile(ASSETS_FOLDER + "dado/dado (" + to_string(i) + ").jpg");
-
-					sf::Sprite dadoSprite;
-					dadoSprite.setTexture(textura);
-					dadoSprite.setTextureRect(sf::IntRect(0, 0, 400, 300));
-					dadoSprite.setPosition(0, 0);
-
-					// Esticar para cobrir toda a janela
-					dadoSprite.setScale(
-						static_cast<float>(window.getSize().x) / dadoSprite.getLocalBounds().width,
-						static_cast<float>(window.getSize().y) / dadoSprite.getLocalBounds().height
-					);
-
-					// Limpe a janela
-					window.clear();
-
-					// Desenhar a tela de seleção na janela
-					window.draw(dadoSprite);
-
-					// Atualize a janela
-					window.display();
-
-					if (i == 30) {
-						i = 1;
+					switch (IndiceMonstro) {
+					case ARANHA:
+						novoMonstro = new Aranha();
+						break;
+					case ARANHA_GRANDE:
+						novoMonstro = new AranhaGrande();
+						break;
+					case ESCORPIAO:
+						novoMonstro = new Escorpiao();
+						break;
 					}
-					else {
-						i++;
-					}
-				}
 
-				delete novoMonstro;
+					cout << novoMonstro->getNomeMonstro();
+
+					this->batalhando = true;
+
+					// BATALHAR AQUI
+
+					this->window.clear();
+
+					player->atacar();
+					// DESENHAR TODOS OS FRAMES DO DADO AQUI
+					int i = 1;
+					while (i <= 30) {
+						sf::Texture textura;
+						textura.loadFromFile(ASSETS_FOLDER + "dado/dado (" + to_string(i) + ").jpg");
+
+						sf::Sprite dadoSprite;
+						dadoSprite.setTexture(textura);
+						dadoSprite.setTextureRect(sf::IntRect(0, 0, 400, 300));
+						dadoSprite.setPosition(0, 0);
+
+						// Esticar para cobrir toda a janela
+						dadoSprite.setScale(
+							static_cast<float>(window.getSize().x) / dadoSprite.getLocalBounds().width,
+							static_cast<float>(window.getSize().y) / dadoSprite.getLocalBounds().height
+						);
+
+						// Limpe a janela
+						window.clear();
+
+						// Desenhar a tela de seleo na janela
+						window.draw(dadoSprite);
+
+						// Atualize a janela
+						window.display();
+
+						if (i == 30) {
+							return;
+						}
+						else {
+							i++;
+						}
+					}
+
+					delete novoMonstro;
 			}
 		}
 	}

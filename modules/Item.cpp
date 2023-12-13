@@ -23,7 +23,7 @@ public:
 			rectSourceSprite.top = 0;
 			sprite.setTextureRect(rectSourceSprite);
 		}
-		else if (i == REVOLVER) {
+		else if (i == METRALHADORA) {
 			rectSourceSprite.left = (SPRITE_WIDTH - 25) * 3;
 			rectSourceSprite.top = 0;
 			sprite.setTextureRect(rectSourceSprite);
