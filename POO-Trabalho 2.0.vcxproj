@@ -142,7 +142,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="modules\Item.cpp" />
     <ClCompile Include="modules\Personagem.cpp" />
-    <ClCompile Include="modules\Monstro.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="modules\.env.h" />
@@ -150,11 +149,13 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\screens\embatalha.png" />
+    <Image Include="assets\screens\morreu.png" />
     <Image Include="assets\screens\personagens1.png" />
     <Image Include="assets\screens\personagens2.png" />
     <Image Include="assets\screens\personagens3.png" />
     <Image Include="assets\screens\personagens4.png" />
     <Image Include="assets\screens\personagens5.png" />
+    <Image Include="assets\screens\venceu.png" />
     <Image Include="assets\sprites\armas\armas.png" />
     <Image Include="assets\sprites\personagem\batedor.png" />
     <Image Include="assets\sprites\personagem\dwarf1.png" />
@@ -167,6 +168,7 @@
     <Image Include="assets\sprites\personagem\escavador.png" />
     <Image Include="assets\sprites\personagem\guerreiro.png" />
     <Image Include="assets\sprites\personagem\medico.png" />
+    <Image Include="assets\sprites\texturas\grass.png" />
     <Image Include="assets\sprites\texturas\ground.jpg" />
     <Image Include="assets\sprites\texturas\wall.png" />
     <Image Include="assets\title.jpg" />

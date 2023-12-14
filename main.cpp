@@ -7,7 +7,7 @@
 #include "modules/.env.h"
 #include "modules/Personagem.cpp"
 #include "modules/Item.cpp"
-#include "modules/Monstro.cpp"
+#include "./modules/utils.h"
 
 const int* MAPAS[NUMERO_TOTAL_MAPAS] = { &MAPA_INICIAL[0][0], &MAPA_2[0][0], &MAPA_3[0][0] };
 
@@ -22,13 +22,13 @@ public:
 	int transitionAlpha; // Intensidade do efeito de transicao
 
 	sf::SoundBuffer menuSound;
+	sf::SoundBuffer gameSound;
 
 	bool selectedPersonagem = false;
 	int telaAtualPersonagem = 0;
 	bool batalhando = false;
 
-	int dadosFramesMax = 30;
-	int dadosFrames = 0;
+	bool morreu = false;
 
 	Window() {
 		this->textureWall.loadFromFile(ASSETS_FOLDER + "sprites/texturas/wall.png");
@@ -37,6 +37,7 @@ public:
 		this->transitionAlpha = 255; // Comeca completamente opaco (sem efeito)
 
 		this->menuSound.loadFromFile(ASSETS_FOLDER + "click.wav");
+		this->gameSound.loadFromFile(ASSETS_FOLDER + "music.wav");
 
 		sf::Texture* personagem1 = new sf::Texture();
 		if (!personagem1->loadFromFile(ASSETS_FOLDER + "screens/personagens1.png")) {
@@ -82,8 +83,17 @@ public:
 
 		std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
+		sf::Sound soundGameMusicsGomosta;
+		soundGameMusicsGomosta.setBuffer(this->gameSound);
+		soundGameMusicsGomosta.setLoop(true);  // Definir para reproduzir em loop
+
 		while (window.isOpen())
 		{
+			if (!batalhando && soundGameMusicsGomosta.getStatus() != sf::Sound::Playing)
+			{
+				soundGameMusicsGomosta.play();
+			}
+
 			const int* mapa = this->getMapa(this->currentMap);
 
 			sf::Event event;
@@ -203,6 +213,7 @@ public:
 							if (!selectedPersonagem) {
 								selectedPersonagem = true;
 
+								delete this->player;
 								if (this->telaAtualPersonagem == BATEDOR) {
 									this->player = new Batedor(BATEDOR);
 								}
@@ -227,7 +238,48 @@ public:
 						if (!isWall(nextPosition, mapa)) {
 							player->move(sf::Vector2f(nextPosition.x - player->getPosition().x, nextPosition.y - player->getPosition().y), window.getSize());
 							this->handleDoorCollision(player->getPosition());
-							this->handleMonsterCollision(player->getPosition());
+							if (this->handleMonsterCollision(player->getPosition())) this->window.create(sf::VideoMode(815, 600), "Deep Rock Galactic", sf::Style::Close | sf::Style::Titlebar);
+
+							if (this->morreu) {
+								// Render screen /assets/screens/morreu.png and wait for keypress
+
+								sf::Texture morreuTexture;
+								if (!morreuTexture.loadFromFile(ASSETS_FOLDER + "screens/morreu.png")) {
+									std::cerr << "Erro ao carregar a textura da tela de morte." << std::endl;
+								}
+
+								sf::Sprite morreuSprite(morreuTexture);
+
+								// Esticar para cobrir toda a janela
+								morreuSprite.setScale(
+									static_cast<float>(window.getSize().x) / morreuSprite.getLocalBounds().width,
+									static_cast<float>(window.getSize().y) / morreuSprite.getLocalBounds().height
+								);
+
+								// Limpe a janela
+								window.clear();
+
+								// Desenhar a tela de seleo na janela
+								window.draw(morreuSprite);
+
+								// Atualize a janela
+								window.display();
+
+								while (true) {
+									sf::Event event;
+									while (window.pollEvent(event))
+									{
+										if (event.type == sf::Event::KeyPressed)
+										{
+											// close application
+											if (event.key.code == sf::Keyboard::Enter) {
+												this->window.close();
+												return false;
+											}
+										}
+									}
+								}
+							}
 						}
 					}
 				}
@@ -326,6 +378,16 @@ private:
 			MAPAS[currentMap][mapY * LARGURA_MAPA + mapX] == 2);
 	}
 
+	// Ganhou o Game/Jogo/Juego
+	bool isGoma(sf::Vector2f position) {
+		int mapX = static_cast<int>(position.x / 24);
+		int mapY = static_cast<int>(position.y / 24) + 2;
+
+		return (mapX >= 0 && mapX < LARGURA_MAPA &&
+			mapY >= 0 && mapY < ALTURA_MAPA &&
+			MAPAS[currentMap][mapY * LARGURA_MAPA + mapX] == 4);
+	}
+
 	bool isMonster(sf::Vector2f position)
 	{
 		int mapX = static_cast<int>(position.x / 24);
@@ -357,12 +419,13 @@ private:
 		return nullptr;
 	}
 
-	void handleMonsterCollision(sf::Vector2f playerPosition)
+	// true -> monstro
+	bool handleMonsterCollision(sf::Vector2f playerPosition)
 	{
 		if (isMonster(playerPosition)) {
-			std::cout << "Area de Monstro!" << std::endl;
-
 			if (gerarNumeroAleatorio(1, 4) == 2) {
+				this->window.close();
+
 				std::cout << "Comecar uma batalha!" << std::endl;
 
 					int IndiceMonstro = gerarNumeroAleatorio(0, 2);
@@ -386,53 +449,37 @@ private:
 					this->batalhando = true;
 
 					// BATALHAR AQUI
+					while (player->verificaVivo()) {
+						int dano = player->atacar(novoMonstro);
 
-					this->window.clear();
+						novoMonstro->tomarDano(dano);
 
-					player->atacar();
-					// DESENHAR TODOS OS FRAMES DO DADO AQUI
-					int i = 1;
-					while (i <= 30) {
-						sf::Texture textura;
-						textura.loadFromFile(ASSETS_FOLDER + "dado/dado (" + to_string(i) + ").jpg");
-
-						sf::Sprite dadoSprite;
-						dadoSprite.setTexture(textura);
-						dadoSprite.setTextureRect(sf::IntRect(0, 0, 400, 300));
-						dadoSprite.setPosition(0, 0);
-
-						// Esticar para cobrir toda a janela
-						dadoSprite.setScale(
-							static_cast<float>(window.getSize().x) / dadoSprite.getLocalBounds().width,
-							static_cast<float>(window.getSize().y) / dadoSprite.getLocalBounds().height
-						);
-
-						// Limpe a janela
-						window.clear();
-
-						// Desenhar a tela de seleo na janela
-						window.draw(dadoSprite);
-
-						// Atualize a janela
-						window.display();
-
-						if (i == 30) {
-							return;
+						if (novoMonstro->verificaVivo() == false) {
+							this->batalhando = false;
+							delete novoMonstro;
+							return true;
 						}
 						else {
-							i++;
+							int monstroDano = novoMonstro->atacar(player->getDefesaPersonagem());
+							player->tomarDano(monstroDano);
+
+							if (player->verificaVivo() == false) {
+								this->batalhando = false;
+								this->morreu = true;
+								delete novoMonstro;
+								return true;
+							}
 						}
 					}
-
-					delete novoMonstro;
+					
+					return true;
 			}
+			else return false;
 		}
 	}
 
 	void handleDoorCollision(sf::Vector2f playerPosition)
 	{
-		std::cout << "Is porta?: " << isDoor(playerPosition) << std::endl;
-
 		if (isDoor(playerPosition)) {
 			int nextMapIndex = currentMap + 1;
 			const int* nextMap = getMapa(nextMapIndex);
@@ -452,6 +499,47 @@ private:
 				this->player->setPosition(sf::Vector2f(50, 50));
 			}
 		}
+
+		if (isGoma(playerPosition)) {
+			// Show screens/venceu.png and wait for keypress
+
+			sf::Texture venceuTexture;
+			if (!venceuTexture.loadFromFile(ASSETS_FOLDER + "screens/venceu.png")) {
+				std::cerr << "Erro ao carregar a textura da tela de vitoria." << std::endl;
+			}
+
+			sf::Sprite venceuSprite(venceuTexture);
+
+			// Esticar para cobrir toda a janela
+			venceuSprite.setScale(
+				static_cast<float>(window.getSize().x) / venceuSprite.getLocalBounds().width,
+				static_cast<float>(window.getSize().y) / venceuSprite.getLocalBounds().height
+			);
+
+			// Limpe a janela
+			window.clear();
+
+			// Desenhar a tela de seleo na janela
+			window.draw(venceuSprite);
+
+			// Atualize a janela
+			window.display();
+
+			while (true) {
+				sf::Event event;
+				while (window.pollEvent(event))
+				{
+					if (event.type == sf::Event::KeyPressed)
+					{
+						// close application
+						if (event.key.code == sf::Keyboard::Enter) {
+							this->window.close();
+							return;
+						}
+					}
+				}
+			}
+		}
 	}
 };
 
@@ -466,3 +554,5 @@ int main()
 
 	return 0;
 }
+
+// Gomar -> verbo referente a se tornar goma

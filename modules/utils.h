@@ -3,10 +3,6 @@
 
 #include <random>
 
-void limparTerminal() {
-  system("clear||cls");
-}
-
 int gerarNumeroAleatorio(int min, int max) {
   std::random_device                  rand_dev;
   std::mt19937                        generator(rand_dev());

@@ -1,13 +1,128 @@
-#include <iostream>
-#include <SFML/Graphics.hpp>
-#include "./.env.h"
-#include <vector>
-
-using namespace std;
-
 #define MAX_X 144
 #define SPRITE_WIDTH 48
 #define SPRITE_HEIGHT 64
+
+#include <iostream>
+#include <stdlib.h>
+#include <string>
+#include <vector>
+#include <SFML/Graphics.hpp>
+#include <random>
+#include "./.env.h"
+
+using namespace std;
+
+class Monstro {
+protected:
+	string nome;
+	int _HP, _ATQ, _DEF;
+	IndiceMonstros _TIPOMONSTRO;
+	int vidaAtual = 0;
+
+public:
+	Monstro(string nome, int ptVida, int ptDef, int ptAtq, IndiceMonstros tipoMonstro) : nome(nome), _HP(ptVida), _DEF(ptDef), _ATQ(ptAtq), _TIPOMONSTRO(tipoMonstro) {
+		this->vidaAtual = ptVida;
+	}
+
+	// Função que verifica se o monstro está vivo, comparando se sua vida é maior que 0.
+	bool verificaVivo() {
+		if (this->vidaAtual > 0) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	// Função getter para o nome do monstro.
+	string getNomeMonstro() {
+		return this->nome;
+	}
+
+	// Função getter para a defesa do monstro.
+	int getDefesaMonstro() {
+		return this->_DEF;
+	}
+
+	// Função getter para o tipo do monstro.
+	IndiceMonstros getTipoMonstro() {
+		return _TIPOMONSTRO;
+	}
+
+	// Função getter que retorna um vetor com as estatísticas do monstro.
+	int* getEstatisticas(bool valoresAtuais = false) {
+		int* estatisticas = new int[4];
+
+		if (valoresAtuais)
+			estatisticas[0] = this->vidaAtual;
+		else
+			estatisticas[0] = this->_HP;
+		estatisticas[1] = this->_DEF;
+		estatisticas[2] = this->_ATQ;
+
+		return estatisticas;
+	}
+
+	// Função que imprime as estatísticas do monstro.
+	void printDetalhesMonstro(bool valoresAtuais = false) {
+		int* estatisticas = this->getEstatisticas(valoresAtuais);
+
+		vector<string> cabecalho = { "Estatisticas:\n", "" };
+		vector<vector<string>> tabela = {
+		  {"Nome:", this->nome},
+		  {"Vida:", to_string(estatisticas[0])},
+		  {"Defesa:", to_string(estatisticas[1])},
+		  {"Dano de ataque:", to_string(estatisticas[2])},
+		};
+
+		delete[] estatisticas;
+
+		std::cout << "\n" << cabecalho[0] << cabecalho[1] << endl;
+		for (int i = 0; i < tabela.size(); i++) {
+			cout << tabela[i][0] << " " << tabela[i][1] << endl;
+		}
+	}
+
+
+	// Função que faz o monstro tomar dano.
+	void tomarDano(int dano) {
+		if (dano <= this->_DEF) {
+			cout << "O monstro defendeu o ataque!" << endl;
+			return;
+		}
+
+		this->vidaAtual -= (dano - this->_DEF);
+	}
+
+	// Função que faz o monstro atacar o jogador.
+	int atacar(int defesaJogador) {
+		int dano = this->_ATQ - defesaJogador;
+		cout << "\nO " << COR_VERMELHA << "monstro" << RESET_COR << " causou " << dano << " de dano!" << endl;
+
+		return this->_ATQ;
+	}
+
+	// Função que imprime a vida do monstro.
+	void vidaMonstro() {
+		int vida = this->vidaAtual < 0 ? 0 : this->vidaAtual;
+		cout << "Vida do monstro: " << vida << "/" << this->_HP << endl;
+	}
+};
+
+class Aranha : public Monstro {
+public:
+	Aranha() : Monstro("Aranha", ARANHA_VIDA, ARANHA_DEFESA, ARANHA_ATAQUE, IndiceMonstros::ARANHA) {}
+};
+
+class AranhaGrande : public Monstro {
+public:
+	AranhaGrande() : Monstro("Aranha Grande", ARANHA_GRANDE_VIDA, ARANHA_GRANDE_DEFESA, ARANHA_GRANDE_ATAQUE, IndiceMonstros::ARANHA_GRANDE) {}
+};
+
+class Escorpiao : public Monstro {
+public:
+	Escorpiao() : Monstro("Escorpiao", ESCORPIAO_VIDA, ESCORPIAO_DEFESA, ESCORPIAO_ATAQUE, IndiceMonstros::ESCORPIAO) {}
+};
 
 class Personagem {
 
@@ -26,6 +141,9 @@ private:
 	sf::Sprite sprite;
 	Direcoes direcaoAtual;
 
+	int posicaoAtualX = 0;
+	int posicaoAtualY = 0;
+
 	int minerios[4][2] = {
 	  {OURO, 0},
 	  {MORKITA, 0},
@@ -34,8 +152,10 @@ private:
 	};
 
 public:
-
 	Personagem(int ptVida, int ptDef, int ptAtq, int ptAtqEsp, int mana, int classePersonagem) : _HP(ptVida), _ATQ(ptAtq), _ESP(ptAtqEsp), _DEF(ptDef), _CUSTO_MANA(mana) {
+		this->vidaAtual = ptVida;
+		direcaoAtual = BAIXO;
+		
 		if (classePersonagem == BATEDOR) {
 			this->texture.loadFromFile(ASSETS_FOLDER + "sprites/personagem/batedor.png");
 		}
@@ -109,6 +229,9 @@ public:
 		if (newPosition.x >= 0 && newPosition.x <= windowSize.x - SPRITE_WIDTH &&
 			newPosition.y >= 0 && newPosition.y <= windowSize.y - SPRITE_HEIGHT) {
 			sprite.move(offset);
+
+			this->posicaoAtualX = newPosition.x;
+			this->posicaoAtualY = newPosition.y;
 		}
 	}
 
@@ -160,51 +283,90 @@ public:
 			if (this->vidaAtual > this->_HP) this->vidaAtual = this->_HP;
 
 			this->grauFerimento = 0;
-			cout << "Você se curou em " << int((this->_HP / 2)) << " pontos de vida e curou suas feridas!" << endl;
+			cout << "Voce se curou em " << int((this->_HP / 2)) << " pontos de vida e curou suas feridas!" << endl;
 		}
 		else {
-			cout << "Você não possui nitra suficiente para chamar uma capsula de cura." << endl;
+			cout << "Voce nao possui nitra suficiente para chamar uma capsula de cura." << endl;
 		}
 	}
 
-	int atacar() {
+	// Função getter que retorna um vetor com as estatísticas do jogador.
+	int* getEstatisticas(bool valoresAtuais = false) {
+		int* estatisticas = new int[5];
+
+		if (valoresAtuais)
+			estatisticas[0] = this->vidaAtual;
+		else
+			estatisticas[0] = this->_HP;
+
+		estatisticas[1] = this->_DEF;
+		estatisticas[2] = this->_ATQ;
+		estatisticas[3] = this->_ESP;
+		estatisticas[4] = this->grauFerimento;
+
+		return estatisticas;
+	}
+
+	// Função que imprime as estatísticas do jogador e seus minérios.
+	void printDetalhesClasse(bool valoresAtuais = false) {
+		int* estatisticas = this->getEstatisticas(valoresAtuais);
+
+		vector<string> cabecalho = { "Estatisticas:", "\n" };
+		vector<vector<string>> tabela = {
+			{"Nome:", "Analise de Sistemas"},
+			{"Vida:", to_string(estatisticas[0])},
+			{"Defesa:", to_string(estatisticas[1])},
+			{"Dano de ataque:", to_string(estatisticas[2])},
+			{"Dano do especial:", to_string(estatisticas[3])},
+			{"Grau de sangramento: ", to_string(estatisticas[4])}
+		};
+
+		delete[] estatisticas;
+
+		std::cout << "\n" << cabecalho[0] << cabecalho[1] << cabecalho[2] << cabecalho[3] << endl;
+		for (int i = 0; i < tabela.size(); i++) {
+			cout << tabela[i][0] << " " << tabela[i][1] << " " << tabela[i][2] << " " << tabela[i][3] << endl;
+		}
+	}
+
+	int atacar(Monstro* monstro) {
 		int escolha = NAO_ESPECIFICADO;
 
 		// Mostra as opes e obtm a escolha do jogador
 		while (escolha == NAO_ESPECIFICADO) {
-			cout << endl << endl << "Escolha uma opo:" << endl << endl;
-			cout << "1 - Atacar" << " (Dano atual do ataque: " << _ATQ << ")" << endl << " 2 - Atacar Especial" << endl << " 3 - Trocar arma" << endl << " 4 - Ver seus atributos" << endl << " 5 - Ver atributos do monstro" << endl << " 6 - Invocar uma capsula de cura" << endl << endl << ":";
+			cout << endl << endl << "Escolha uma opcao:" << endl << endl;
+			cout << "1 - Atacar" << " (Dano atual do ataque: " << _ATQ << ")" << endl << "2 - Atacar Especial" << endl << "3 - Trocar arma" << endl << "4 - Ver seus atributos" << endl << "5 - Ver atributos do monstro" << endl << "Escolha:";
 			cin >> escolha;
 
 			// Caso a escolha do jogador no seja nenhuma das opes, ele  solicitado a escolher novamente.
 			if (escolha != NORMAL && escolha != ESPECIAL && escolha != INFORMACOES_PLAYER && escolha != INFORMACOES_MONSTRO && escolha != CAPSULA_CURA && escolha != TROCAR_ARMA) {
-				cout << "Escolha invlida, por favor escolha entre ataque NORMAL ou ESPECIAL!!" << endl;
+				cout << "Escolha invalida, por favor escolha entre ataque NORMAL ou ESPECIAL!!" << endl;
 				escolha = NAO_ESPECIFICADO;
 			}
 
 			else if (escolha == TROCAR_ARMA) {
-				//limparTerminal();
+				system("clear||cls");
 				printItensInventario();
 				escolha = NAO_ESPECIFICADO;
 			}
 
 			// Caso a escolha seja INFORMACOES_PLAYER, mostramos os atributos do jogador e resetamos o loop.
 			else if (escolha == INFORMACOES_PLAYER) {
-				//limparTerminal();
-				//printDetalhesClasse(true);
+				system("clear||cls");
+				printDetalhesClasse(true);
 				escolha = NAO_ESPECIFICADO;
 			}
 
-			// Caso a escolha seja INFORMACOES_MONSTRO, mostramos os atributos do monstro e resetamos o loop.
-			/*else if (escolha == INFORMACOES_MONSTRO) {
-				limparTerminal();
+			 //Caso a escolha seja INFORMACOES_MONSTRO, mostramos os atributos do monstro e resetamos o loop.
+			else if (escolha == INFORMACOES_MONSTRO) {
+				system("clear||cls");
 				monstro->printDetalhesMonstro(true);
 				escolha = NAO_ESPECIFICADO;
-			}*/
+			}
 
 			// Caso a escolha seja CAPSULA_CURA, tentamos curar o jogador e resetamos o loop.
 			else if (escolha == CAPSULA_CURA) {
-				//limparTerminal();
+				system("clear||cls");
 				solicitaCapsula();
 				escolha = NAO_ESPECIFICADO;
 			}
@@ -213,44 +375,50 @@ public:
 		}
 
 		// Por fim, calculamos o dano de ataque do jogador, verificamos sua mana e verificamos o ataque escolhido.
-		//int dano = this->_ATQ - monstro->getDefesaMonstro();
+		int dano = this->_ATQ - monstro->getDefesaMonstro();
 		bool manaSuficiente = this->VerificaMana();
 
+		system("clear||cls");
+
 		// Se for diferente de normal, quer dizer que  o especial
-		//if (escolha != Escolha::NORMAL) {
-		//	if (manaSuficiente) {
-		//		// O nmero aleatrio aqui  para simular um ataque crtico
-		//		int ran = gerarNumeroAleatorio(0, 4);
+		if (escolha != Escolha::NORMAL) {
+			if (manaSuficiente) {
+				// O nmero aleatrio aqui  para simular um ataque crtico
+				std::random_device                  rand_dev;
+				std::mt19937                        generator(rand_dev());
+				std::uniform_int_distribution<int>  distr(0, 4);
 
-		//		// O dano  composto pelo especial menos a defesa do monstro
-		//		dano = this->_ESP - monstro->getDefesaMonstro();
+				int ran = distr(generator);
 
-		//		// Se o nmero aleatrio for 2, o ataque  crtico e  multiplicado por 2
-		//		if (ran == 2) {
-		//			cout << "ATAQUE CRTICO!\n";
-		//			dano = this->_ESP * 2;
-		//		}
+				// O dano  composto pelo especial menos a defesa do monstro
+				dano = this->_ESP - monstro->getDefesaMonstro();
 
-		//		// A mana  diminuda pelo custo do especial
-		//		this->manaAtual -= this->_CUSTO_MANA;
+				// Se o nmero aleatrio for 2, o ataque  crtico e  multiplicado por 2
+				if (ran == 2) {
+					cout << "ATAQUE CRTICO!\n";
+					dano = this->_ESP * 2;
+				}
 
-		//		// O dano  mostrado na tela
-		//		cout << COR_VERDE << "\nVoc " << RESET_COR << "causou " << dano << " de dano!" << endl;
-		//		return this->_ESP;
-		//	}
-		//	else {
-		//		cout << "O ataque especial nao esta pronto! Voc trocou para o ataque normal!" << endl;
-		//	}
-		//}
+				// A mana  diminuda pelo custo do especial
+				this->manaAtual -= this->_CUSTO_MANA;
 
-		//cout << COR_VERDE << "\nVoc " << RESET_COR << "causou " << dano << " de dano!" << endl;
+				// O dano  mostrado na tela
+				cout << COR_VERDE << "\nVoc " << RESET_COR << "causou " << dano << " de dano!" << endl;
+				return this->_ESP;
+			}
+			else {
+				cout << "O ataque especial nao esta pronto! Voce trocou para o ataque normal!" << endl;
+			}
+		}
+
+		cout << COR_VERDE << "\nVoce " << RESET_COR << "causou " << dano << " de dano!" << endl;
 		return this->_ATQ;
 	}
 
 	// Função que faz o jogador tomar dano.
 	void tomarDano(int dano) {
 		if (dano <= this->_DEF) {
-			cout << "Você defendeu o ataque!" << endl;
+			cout << "Voce defendeu o ataque!" << endl;
 			return;
 		}
 
@@ -259,7 +427,7 @@ public:
 
 	// Função que faz o jogador ser ferido pelo monstro (sangramento).
 	void aumentaFerimento() {
-		cout << "Você foi ferido!" << endl;
+		cout << "Voce foi ferido!" << endl;
 
 		this->grauFerimento += 1;
 	}
@@ -273,8 +441,8 @@ public:
 	void sangrar(int dano) {
 		if (this->grauFerimento == 0) return;
 
-		cout << "\nVocê está sangrando!" << endl;
-		cout << "Você recebeu " << dano << " de dano!\n" << endl;
+		cout << "\nVoce está sangrando!" << endl;
+		cout << "Voce recebeu " << dano << " de dano!\n" << endl;
 		this->vidaAtual -= dano;
 
 		if (this->vidaAtual <= 0) {
@@ -290,7 +458,7 @@ public:
 
 	// Função que imprime a morte do jogador.
 	void morrer() {
-		cout << "Você morreu!" << endl;
+		cout << "Voce morreu!" << endl;
 	}
 
 	void printItensInventario() {
@@ -320,7 +488,7 @@ public:
 		cin >> escolha;
 
 		if (escolha > equipamentos.size()) {
-			cout << "Escolha invlida!" << endl;
+			cout << "Escolha invalida!" << endl;
 			return;
 		}
 		else {
